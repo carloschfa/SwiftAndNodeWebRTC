@@ -6,7 +6,11 @@ Simple WebRTC Client and Server using swift iOS and Node.JS with the GoogleWebRT
 
 ## How to run it.
 
+The port 8080 has to be open.
+
 With Node installed, go to the server folder and run `node app.js`.
+
+Execute `pod install` in the root folder of the project.
 
 Change the ip in the `ViewController.swift`.
 
