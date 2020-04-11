@@ -34,7 +34,7 @@ class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate,
   var useCustomCapturer: Bool = true
   
   // Mark: - Constants
-  let ipAddress: String = "18.230.115.107"
+  let ipAddress: String = "99.79.32.252"
   
   override func viewDidAppear(_ animated: Bool) {
     let remoteVideoViewContainter = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.5))
