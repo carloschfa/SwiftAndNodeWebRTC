@@ -49,10 +49,7 @@ class WebRTCClient: NSObject, RTCPeerConnectionDelegate, RTCVideoViewDelegate, R
     self.channels.audio = audioTrack
     self.customFrameCapturer = customFrameCapturer
     
-    let videoEncoderFactory = RTCDefaultVideoEncoderFactory()
-    let videoDecoderFactory = RTCDefaultVideoDecoderFactory()
-    self.peerConnectionFactory = RTCPeerConnectionFactory(encoderFactory: videoEncoderFactory, decoderFactory: videoDecoderFactory)
-    
+    setupPeerConnectionFactory()
     setupView()
     setupLocalTracks()
     
@@ -60,6 +57,12 @@ class WebRTCClient: NSObject, RTCPeerConnectionDelegate, RTCVideoViewDelegate, R
       startCaptureLocalVideo(cameraPositon: .front, videoWidth: 640, videoHeight: 640*16/9, videoFps: 30)
       self.localVideoTrack?.add(self.localRenderView!)
     }
+  }
+  
+  func setupPeerConnectionFactory() {
+    let videoEncoderFactory = RTCDefaultVideoEncoderFactory()
+    let videoDecoderFactory = RTCDefaultVideoDecoderFactory()
+    self.peerConnectionFactory = RTCPeerConnectionFactory(encoderFactory: videoEncoderFactory, decoderFactory: videoDecoderFactory)
   }
   
   func localVideoView() -> UIView {
@@ -104,6 +107,8 @@ class WebRTCClient: NSObject, RTCPeerConnectionDelegate, RTCVideoViewDelegate, R
   func disconnect(){
     if self.peerConnection != nil{
       self.peerConnection!.close()
+      self.peerConnectionFactory = nil
+      self.peerConnection = nil
     }
   }
   
@@ -166,9 +171,11 @@ class WebRTCClient: NSObject, RTCPeerConnectionDelegate, RTCVideoViewDelegate, R
   // MARK: - Setup
   private func setupPeerConnection() -> RTCPeerConnection{
     let rtcConf = RTCConfiguration()
+    
     rtcConf.iceServers = [RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"])]
     let mediaConstraints = RTCMediaConstraints.init(mandatoryConstraints: nil, optionalConstraints: nil)
     let pc = self.peerConnectionFactory.peerConnection(with: rtcConf, constraints: mediaConstraints, delegate: nil)
+    
     return pc
   }
   
@@ -330,7 +337,7 @@ class WebRTCClient: NSObject, RTCPeerConnectionDelegate, RTCVideoViewDelegate, R
     self.isConnected = false
     
     DispatchQueue.main.async {
-      self.peerConnection!.close()
+      self.peerConnection?.close()
       self.peerConnection = nil
       self.remoteRenderView?.isHidden = true
       self.dataChannel = nil
@@ -344,12 +351,22 @@ class WebRTCClient: NSObject, RTCPeerConnectionDelegate, RTCVideoViewDelegate, R
 extension WebRTCClient {
   func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
     var state = ""
-    if stateChanged == .stable{
-      state = "stable"
-    }
     
-    if stateChanged == .closed{
+    switch stateChanged {
+    case .stable:
+      state = "stable"
+    case .haveLocalOffer:
+      state = "haveLocalOffer"
+    case .haveLocalPrAnswer:
+      state = "haveLocalPrAnswer"
+    case .haveRemoteOffer:
+      state = "haveRemoteOffer"
+    case .haveRemotePrAnswer:
+      state = "haveRemotePrAnswer"
+    case .closed:
       state = "closed"
+    default:
+      state = "undefined"
     }
     
     print("signaling state changed: ", state)

@@ -20,36 +20,38 @@ class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate,
   @IBOutlet weak var sourceNameTextField: UITextField!
   @IBOutlet weak var destinationNameTextField: UITextField!
   @IBOutlet weak var callButton: UIButton!
-  @IBOutlet weak var disconnectButton: UIButton!
   
   // Mark: - Private Properties
   private var source: String?
   private var destination: String?
   
   // Mark: - Public Properties
-  var webRTCClient: WebRTCClient!
+  var webRTCClient: WebRTCClient?
   var socket: WebSocket!
   var tryToConnectWebSocket: Timer!
   var cameraSession: CameraSession?
   var useCustomCapturer: Bool = true
   
   // Mark: - Constants
-  let ipAddress: String = "99.79.32.252"
+  let ipAddress: String = "18.228.43.69"
   
   override func viewDidAppear(_ animated: Bool) {
+    
     let remoteVideoViewContainter = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.5))
     remoteVideoViewContainter.backgroundColor = .gray
     self.view.addSubview(remoteVideoViewContainter)
     
-    let remoteVideoView = webRTCClient.remoteVideoView()
-    webRTCClient.setupRemoteViewFrame(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.5))
-    remoteVideoView.center = remoteVideoViewContainter.center
-    remoteVideoViewContainter.addSubview(remoteVideoView)
-    
-    let localVideoView = webRTCClient.localVideoView()
-    webRTCClient.setupLocalViewFrame(frame: CGRect(x: 20, y: 20, width: UIScreen.main.bounds.width/4, height: UIScreen.main.bounds.height/4))
-    localVideoView.subviews.last?.isUserInteractionEnabled = true
-    self.view.addSubview(localVideoView)
+    if webRTCClient != nil {
+      let remoteVideoView = webRTCClient!.remoteVideoView()
+      webRTCClient!.setupRemoteViewFrame(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.5))
+      remoteVideoView.center = remoteVideoViewContainter.center
+      remoteVideoViewContainter.addSubview(remoteVideoView)
+      
+      let localVideoView = webRTCClient!.localVideoView()
+      webRTCClient!.setupLocalViewFrame(frame: CGRect(x: 20, y: 20, width: UIScreen.main.bounds.width/4, height: UIScreen.main.bounds.height/4))
+      localVideoView.subviews.last?.isUserInteractionEnabled = true
+      self.view.addSubview(localVideoView)
+    }
   }
   
   override func viewDidLoad() {
@@ -60,8 +62,8 @@ class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate,
     #endif
     
     webRTCClient = WebRTCClient()
-    webRTCClient.delegate = self
-    webRTCClient.setup(videoTrack: true, audioTrack: true, dataChannel: false, customFrameCapturer: useCustomCapturer)
+    webRTCClient?.delegate = self
+    webRTCClient?.setup(videoTrack: true, audioTrack: true, dataChannel: false, customFrameCapturer: useCustomCapturer)
     
     if useCustomCapturer {
       self.cameraSession = CameraSession()
@@ -73,8 +75,10 @@ class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate,
     socket.delegate = self
     
     tryToConnectWebSocket = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { (timer) in
-      if self.webRTCClient.isConnected || self.socket.isConnected {
-        return
+      if self.webRTCClient != nil {
+        if self.webRTCClient!.isConnected || self.socket.isConnected {
+          return
+        }
       }
       
       self.socket.connect()
@@ -88,7 +92,6 @@ class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate,
     sourceNameTextField.addTarget(self, action: #selector(self.sourceNameDidChange(_:)), for: UIControl.Event.editingChanged)
     destinationNameTextField.addTarget(self, action: #selector(self.destinationNameDidChange(_:)), for: UIControl.Event.editingChanged)
     callButton.addTarget(self, action: #selector(self.callButtonTapped(_:)), for: .touchUpInside)
-    disconnectButton.addTarget(self, action: #selector(self.disconnectpButtonTapped(_:)), for: .touchUpInside)
     
     let tap  = UITapGestureRecognizer(target: self.scrollView, action: #selector(UIView.endEditing))
     scrollView.addGestureRecognizer(tap)
@@ -119,15 +122,28 @@ class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate,
   
   // MARK: - UI Events
   @objc func callButtonTapped(_ sender: UIButton){
-    if !webRTCClient.isConnected {
-      webRTCClient.connect(onSuccess: { (offerSDP: RTCSessionDescription) -> Void in
-        self.sendSDP(sessionDescription: offerSDP)
-      })
+    if let value = callButton.titleLabel?.text {
+      if value == "Call" {
+        if webRTCClient != nil {
+          if !webRTCClient!.isConnected {
+            webRTCClient!.connect(onSuccess: { (offerSDP: RTCSessionDescription) -> Void in
+              self.sendSDP(sessionDescription: offerSDP)
+              self.setCallButtonTitle(with: "Disconnect")
+            })
+          }
+        }
+      } else if value == "Disconnect" {
+        webRTCClient?.disconnect()
+        webRTCClient?.setupPeerConnectionFactory()
+        self.setCallButtonTitle(with: "Call")
+      }
     }
   }
   
-  @objc func disconnectpButtonTapped(_ sender: UIButton){
-    webRTCClient.disconnect()
+  private func setCallButtonTitle(with value: String) {
+    DispatchQueue.main.async {
+      self.callButton.setTitle(value, for: .normal)
+    }
   }
   
   // MARK: - WebRTC Signaling
@@ -190,18 +206,18 @@ extension ViewController {
       if signalingMessage.type == "offer" {
         
         if signalingMessage.destination == self.source {
-          webRTCClient.receiveOffer(offerSDP: RTCSessionDescription(type: .offer, sdp: (signalingMessage.sessionDescription?.sdp)!), onCreateAnswer: {(answerSDP: RTCSessionDescription) -> Void in
+          webRTCClient?.receiveOffer(offerSDP: RTCSessionDescription(type: .offer, sdp: (signalingMessage.sessionDescription?.sdp)!), onCreateAnswer: {(answerSDP: RTCSessionDescription) -> Void in
             self.sendSDP(sessionDescription: answerSDP)
           })
         }
       }else if signalingMessage.type == "answer" {
         if signalingMessage.destination == self.source {
-          webRTCClient.receiveAnswer(answerSDP: RTCSessionDescription(type: .answer, sdp: (signalingMessage.sessionDescription?.sdp)!))
+          webRTCClient?.receiveAnswer(answerSDP: RTCSessionDescription(type: .answer, sdp: (signalingMessage.sessionDescription?.sdp)!))
         }
       }else if signalingMessage.type == "candidate" {
         if signalingMessage.destination == self.source {
           let candidate = signalingMessage.candidate!
-          webRTCClient.receiveCandidate(candidate: RTCIceCandidate(sdp: candidate.sdp, sdpMLineIndex: candidate.sdpMLineIndex, sdpMid: candidate.sdpMid))
+          webRTCClient?.receiveCandidate(candidate: RTCIceCandidate(sdp: candidate.sdp, sdpMLineIndex: candidate.sdpMLineIndex, sdpMid: candidate.sdpMid))
         }
       }
     }catch{
@@ -225,22 +241,30 @@ extension ViewController {
     switch iceConnectionState {
     case .checking:
       state = "checking"
+      setCallButtonTitle(with: "Call")
     case .closed:
       state = "closed"
+      setCallButtonTitle(with: "Call")
     case .completed:
       state = "completed"
+      setCallButtonTitle(with: "Disconnect")
     case .connected:
       state = "connected"
+      setCallButtonTitle(with: "Disconnect")
     case .count:
       state = "count..."
     case .disconnected:
       state = "disconnected"
+      setCallButtonTitle(with: "Call")
     case .failed:
       state = "failed"
+      setCallButtonTitle(with: "Call")
     case .new:
       state = "new..."
+      setCallButtonTitle(with: "Call")
     default:
       state = "-"
+      setCallButtonTitle(with: "Call")
     }
     self.webRTCStatusLabel.text = state
   }
@@ -262,7 +286,7 @@ extension ViewController {
   func didOutput(_ sampleBuffer: CMSampleBuffer) {
     if self.useCustomCapturer {
       if let cvpixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer){
-        self.webRTCClient.captureCurrentFrame(sampleBuffer: cvpixelBuffer)
+        webRTCClient?.captureCurrentFrame(sampleBuffer: cvpixelBuffer)
       }else{
         print("no pixelbuffer")
       }
