@@ -1,20 +1,29 @@
 PODS:
+  - Apollo (0.25.0):
+    - Apollo/Core (= 0.25.0)
+  - Apollo/Core (0.25.0)
+  - Apollo/WebSocket (0.25.0):
+    - Apollo/Core
+    - Starscream (~> 3.1.1)
   - GoogleWebRTC (1.1.29400)
-  - Starscream (3.0.6)
+  - Starscream (3.1.1)
 
 DEPENDENCIES:
+  - Apollo
+  - Apollo/WebSocket
   - GoogleWebRTC
-  - Starscream
 
 SPEC REPOS:
   trunk:
+    - Apollo
     - GoogleWebRTC
     - Starscream
 
 SPEC CHECKSUMS:
+  Apollo: c0fbe32f9d4fb5aaffbab6adcecd492a2e952eab
   GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
-  Starscream: ef3ece99d765eeccb67de105bfa143f929026cf5
+  Starscream: 4bb2f9942274833f7b4d296a55504dcfc7edb7b0
 
-PODFILE CHECKSUM: 0c08418913e7dfb2244cd4b5447528dc082ffb22
+PODFILE CHECKSUM: 4024e134f83e450729ebdeb7bfb27b8b68987471
 
 COCOAPODS: 1.9.1

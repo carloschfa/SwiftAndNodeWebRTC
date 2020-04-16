@@ -6,6 +6,7 @@ target 'RelatedWebRTC' do
   use_frameworks!
 
   # Pods for RelatedWebRTC
-  pod 'Starscream'
+  pod 'Apollo'
+  pod "Apollo/WebSocket"
   pod 'GoogleWebRTC'
 end

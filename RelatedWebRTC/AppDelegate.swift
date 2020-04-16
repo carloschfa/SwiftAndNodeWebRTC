@@ -7,6 +7,22 @@
 //
 
 import UIKit
+import Apollo
+
+let graphQLEndpoint = "http://127.0.0.1:3001/graphql"
+let apollo: ApolloClient = {
+    let configuration = URLSessionConfiguration.default
+    let wsEndpointURL = URL(string: "ws://127.0.0.1:3001/graphql")!
+    let endpointURL = URL(string: graphQLEndpoint)!
+    let websocket = WebSocketTransport(request: URLRequest(url: wsEndpointURL), connectingPayload: nil)
+    let splitNetworkTransport = SplitNetworkTransport(
+        httpNetworkTransport: HTTPNetworkTransport(
+            url: endpointURL
+        ),
+        webSocketNetworkTransport: websocket
+    )
+  return ApolloClient(networkTransport: splitNetworkTransport)
+}()
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

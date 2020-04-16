@@ -18,6 +18,7 @@
 		462737502441380C00F2074E /* RTCFrameCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627374F2441380C00F2074E /* RTCFrameCapture.swift */; };
 		4627375324413BAD00F2074E /* CameraSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627375224413BAD00F2074E /* CameraSession.swift */; };
 		4627375524413E0800F2074E /* Signaling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4627375424413E0800F2074E /* Signaling.swift */; };
+		46986F62244881B9002A6725 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46986F61244881B9002A6725 /* API.swift */; };
 		469FD0BD244196A000252A5F /* sample.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 469FD0BC244196A000252A5F /* sample.mp4 */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,7 @@
 		4627374F2441380C00F2074E /* RTCFrameCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCFrameCapture.swift; sourceTree = "<group>"; };
 		4627375224413BAD00F2074E /* CameraSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSession.swift; sourceTree = "<group>"; };
 		4627375424413E0800F2074E /* Signaling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signaling.swift; sourceTree = "<group>"; };
+		46986F61244881B9002A6725 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		469FD0BC244196A000252A5F /* sample.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample.mp4; sourceTree = "<group>"; };
 		5E8AF1965411D56D68BBBD4C /* Pods-RelatedWebRTC.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RelatedWebRTC.release.xcconfig"; path = "Target Support Files/Pods-RelatedWebRTC/Pods-RelatedWebRTC.release.xcconfig"; sourceTree = "<group>"; };
 		8FF3BBF64B52066D613CD6E9 /* Pods_RelatedWebRTC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RelatedWebRTC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,6 +83,7 @@
 				46273740244135AC00F2074E /* Assets.xcassets */,
 				46273742244135AC00F2074E /* LaunchScreen.storyboard */,
 				46273745244135AC00F2074E /* Info.plist */,
+				46986F61244881B9002A6725 /* API.swift */,
 			);
 			path = RelatedWebRTC;
 			sourceTree = "<group>";
@@ -252,6 +255,7 @@
 				46273738244135A600F2074E /* AppDelegate.swift in Sources */,
 				4627373A244135A600F2074E /* SceneDelegate.swift in Sources */,
 				462737502441380C00F2074E /* RTCFrameCapture.swift in Sources */,
+				46986F62244881B9002A6725 /* API.swift in Sources */,
 				4627374E244136B900F2074E /* WebRTCClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

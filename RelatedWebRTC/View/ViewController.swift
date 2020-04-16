@@ -9,6 +9,7 @@
 import UIKit
 import Starscream
 import WebRTC
+import Apollo
 
 class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate, CameraSessionDelegate {
   
@@ -33,7 +34,7 @@ class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate,
   var useCustomCapturer: Bool = true
   
   // Mark: - Constants
-  let ipAddress: String = "18.228.43.69"
+  let ipAddress: String = "127.0.0.1"
   
   override func viewDidAppear(_ animated: Bool) {
     
@@ -84,6 +85,36 @@ class ViewController: UIViewController, WebSocketDelegate, WebRTCClientDelegate,
       self.socket.connect()
     })
     self.setupActions()
+    createObserver()
+    
+  }
+  
+  private func createObserver() {
+    apollo.subscribe(subscription: FriendSubscription(userId: "")) { result in
+      switch result {
+      case .success(let graphql):
+        print(graphql)
+      case .failure(let error):
+        print(error)
+      }
+    }
+    fetchObjects()
+  }
+  
+  func fetchObjects() {
+  apollo.fetch(query: FriendsQuery(userId: "")) { result in
+    switch result {
+    case .success(let graphQLResult):
+      if let objects = graphQLResult.data?.objects {
+        for object in objects {
+          print(object)
+        }
+      }
+      
+    case .failure(let error):
+      print(error)
+    }
+  }
   }
   
   private func setupActions() {
